@@ -21,6 +21,7 @@ from random import random
 from django.http import HttpResponse
 
 from app_weather.views import my_view
+from app_wishlist.views import wishlist_view
 from store.views import products_view, shop_view
 
 
@@ -36,4 +37,5 @@ urlpatterns = [
     path('', include('app_weather.urls')),
     path('', include('store.urls')),
     path('login/', include('app_login.urls')),
+    path('', include('app_wishlist.urls')),
 ]
