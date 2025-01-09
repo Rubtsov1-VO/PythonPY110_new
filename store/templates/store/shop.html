@@ -208,7 +208,7 @@
 
 		if (currentState === 'inactive') {
 			// Отправить запрос на добавление в избранное
-			fetch('/wishlist/api/add/' + productId, { method: 'GET' })
+			fetch('/wishlist/add/' + productId, { method: 'GET' })
 				.then(function (response) {
 					if (response.ok) {
 						showPopupMessage(productId, 'Продукт успешно добавлен в избранное');

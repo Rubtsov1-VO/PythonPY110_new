@@ -14,7 +14,7 @@ def login_view(request):
         if user:
             login(request, user)
             add_user_to_cart(request, user.username)
-            add_user_to_wishlist(request,user.username)
+            add_user_to_wishlist(request, user.username)
             return redirect("/")
         return render(request, "login/login.html", context={"error": "Неверные данные"})
 
