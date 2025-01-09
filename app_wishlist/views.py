@@ -3,8 +3,8 @@ import os
 
 from django.contrib.auth import get_user
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
+from django.shortcuts import render, redirect
 
 from logic.services import view_in_wishlist, add_to_cart, remove_from_cart, view_in_cart, add_to_wishlist, \
     remove_from_wishlist
@@ -24,17 +24,14 @@ def wishlist_view(request):
         data = view_in_wishlist(request)[current_user]  # TODO получить продукты из избранного для пользователя
 
         products = []
-        for product_id, quantity in data['products']:
+        for product_id in data['products']:
             product = DATABASE[product_id]  # 1. Получите информацию о продукте из DATABASE по его product_id. product будет словарём
-            product['quantity'] = quantity# 2. в словарь product под ключом "quantity" запишите текущее значение товара в корзине
-            product["price_total"] = f"{quantity * product['price_after']:.2f}"  # добавление общей цены позиции с ограничением в 2 знака
-            # 3. добавьте product в список products
             products.append(product)
         # TODO сформировать список словарей продуктов с их характеристиками
 
         return render(request, 'wishlist/wishlist.html', context={"products": products})
 
-
+@login_required(login_url='login:login_view')
 def wishlist_add_json(request, id_product: str):
     """
     Добавление продукта в избранное и возвращение информации об успехе или неудаче в JSON
@@ -48,6 +45,7 @@ def wishlist_add_json(request, id_product: str):
         return JsonResponse({"answer": "Неудачное добавление в избранное"},
                             status=404,
                             json_dumps_params={'ensure_ascii': False})
+
 
 def wishlist_del_json(request, id_product: str):
     """
@@ -78,3 +76,21 @@ def wishlist_json(request):
         return JsonResponse({"answer": "Пользователь не авторизирован"},
                             status=404,
                             json_dumps_params={'ensure_ascii': False})  # TODO верните JsonResponse с ключом "answer" и значением "Пользователь не авторизирован" и параметром status=404
+
+
+@login_required(login_url='login:login_view')
+def wishlist_buy_now_view(request, id_product):
+    if request.method == "GET":
+        result = add_to_wishlist(request, id_product)
+        if result:
+            return redirect("wishlist:wishlist_view")
+
+        return HttpResponseNotFound("Неудачное добавление в избранное")
+
+def wishlist_remove_view(request, id_product):
+    if request.method == "GET":
+        result = remove_from_wishlist(request, id_product)
+        if result:
+            return redirect("wishlist:wishlist_view") # TODO Вернуть перенаправление на корзину
+
+        return HttpResponseNotFound("Неудачное удаление из корзины")

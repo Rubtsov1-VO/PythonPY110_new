@@ -167,7 +167,7 @@ def add_to_wishlist(request,id_product: str) -> bool:
     wishlist = wishlist_users[get_user(request).username]  # стало # TODO Помните, что у вас есть уже реализация просмотра корзины,
     if id_product in DATABASE:
         if id_product not in wishlist['products']:
-            wishlist['products'][id_product] = 1
+            wishlist['products'].append(id_product)
         with open('wishlist.json', mode='w', encoding='utf-8') as f:  # Создаём файл и записываем туда пустую корзину
             json.dump(wishlist_users, f)
         return True
